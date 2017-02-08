@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": true,
+    "removeComments": false,
+    "noImplicitAny": false,
+    "outDir": "../../public/client",
+    "rootDir": ".",
+    "pretty": true,
+    "jsx": "react"
+  },
+  "files": [
+    "../../node_modules/chen-react/typings/index.d.ts"
+  ],
+  "include": [
+    "**/*.tsx",
+    "**/*.ts"
+  ]
+}
