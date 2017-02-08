@@ -1,0 +1,17 @@
+{
+  "name": "app",
+  "description": "",
+  "main": "index.js",
+  "authors": [],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,42 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "start:watch": "nodemon --watch dist --watch resources/views -e js,html,json dist/server.js",
+    "test": "node artisan.js test",
+    "build": "gulp",
+    "build:watch": "gulp watch",
+    "build-server": "chen-tsc -p src/server/tsconfig.json",
+    "build-server:watch": "chen-tsc --watch -p src/server/tsconfig.json",
+    "build-client": "webpack --config src/client/webpack.config.js",
+    "build-client:watch": "webpack --watch --config src/client/webpack.config.js",
+    "build-assets": "gulp build-assets",
+    "build-assets:watch": "gulp build-assets:watch",
+    "typings:client": "cd src/client && typings",
+    "typings:server": "cd src/server && typings",
+    "bower": "bower"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chen": "git://github.com/chen-framework/chen.git#compiled",
+    "connect-redis": "^3.0.2",
+    "mysql": "^2.10.2"
+  },
+  "devDependencies": {
+    "bower": "^1.7.9",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-sym": "0.0.14",
+    "gulp-typescript": "^3.0.1",
+    "gulp-util": "^3.0.7",
+    "nodemon": "^1.10.0",
+    "ts-loader": "^0.8.2",
+    "typescript": "^2.0.3",
+    "webpack": "^1.13.2"
+  }
+}
