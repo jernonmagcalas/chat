@@ -15,6 +15,7 @@ export async function up(db: knex) {
     table.timestamps();
 
     table.unique(['slug']);
+    table.unique(['key']);
   });
 }
 

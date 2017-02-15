@@ -12,13 +12,7 @@ export default function (router: Router, config: Config) {
 
     // access token required
     // router.group({ middleware: ['ValidateToken'] }, (router) => {
-    //   router.route('GET', 'user', 'UserController@currentUser');
-    //
-    //   router.group({ middleware: ['CheckUserIdParam'] }, (router) => {
-    //     router.route('GET', 'user/:user_id/friends', 'UserController@friends');
-    //     router.route('POST', 'user/:user_id/apprequest', 'AppController@appRequest');
-    //     router.route('GET', 'user/:user_id/apprequest/:request_id', 'AppController@getUserRequest');
-    //   });
+
     // });
   });
 
