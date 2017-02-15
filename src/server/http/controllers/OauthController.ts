@@ -1,12 +1,11 @@
-import { Controller, Request, Response, HttpException } from 'chen/web';
+import { Controller, Request, Response } from 'chen/web';
 import { injectable, ValidatorException } from 'chen/core';
-import { UtilService, AccessTokenService, AppService } from 'app/services';
+import { AccessTokenService, AppService } from 'app/services';
 
 @injectable()
 export class OauthController extends Controller {
 
-  constructor(private utilService: UtilService, private accessTokenService: AccessTokenService,
-              private appService: AppService) {
+  constructor(private accessTokenService: AccessTokenService, private appService: AppService) {
     super();
   }
 
@@ -31,11 +30,9 @@ export class OauthController extends Controller {
 
         // get the app
         let app = await this.appService.findOne({ key: data['client_id'] });
-
         if (!app) {
           throw new ValidatorException({ client_id: ['Invalid'] });
         }
-
         if (app && app.secret.valueOf() !== data['client_secret']) {
           throw new ValidatorException({ client_secret: ['Invalid'] });
         }
@@ -50,7 +47,6 @@ export class OauthController extends Controller {
           scope: token.scope,
           expires_in: token.expiration
         };
-
         break;
     }
 

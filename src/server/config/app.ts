@@ -80,6 +80,11 @@ export default {
     guards: {
       site: {
         model: 'User'
+      },
+
+      api: {
+        model: 'AccessToken',
+        service: 'auth/ApiService'
       }
     }
   },

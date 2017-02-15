@@ -11,9 +11,9 @@ export default function (router: Router, config: Config) {
     router.resource('apps', 'AppController');
 
     // access token required
-    // router.group({ middleware: ['ValidateToken'] }, (router) => {
-
-    // });
+    router.group({ middleware: ['ValidateApiToken'] }, (router) => {
+      router.resource('users', 'UserController');
+    });
   });
 
   router.route('GET', '/', 'IndexController@index');

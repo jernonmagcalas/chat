@@ -31,6 +31,10 @@ export class AccessToken extends Model {
 
   @field()
   public updatedAt: FieldTypes.Date;
+
+  public isAppToken() {
+    return this.userId ? false : true;
+  }
 }
 
 export class AccessTokenCollection extends Collection<AccessToken> {
