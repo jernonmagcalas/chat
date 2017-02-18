@@ -13,6 +13,10 @@ export default function (router: Router, config: Config) {
     // access token required
     router.group({ middleware: ['ValidateApiToken'] }, (router) => {
       router.resource('users', 'UserController');
+      router.group({ middleware: ['ValidateAppUser'], prefix: 'users/:user_id' }, router => {
+        router.route('GET', 'tags', 'UserTagController@index');
+      });
+
       router.resource('tags', 'TagController');
       router.group({ middleware: ['ValidateTag'], prefix: 'tags/:tag_id' }, router => {
         router.route('POST', 'assign/:user_id', 'UserTagController@store');

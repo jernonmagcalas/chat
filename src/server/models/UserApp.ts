@@ -1,4 +1,5 @@
-import { Model, Collection, field, FieldTypes } from 'chen/sql';
+import { Model, Collection, field, FieldTypes, Relations } from 'chen/sql';
+import { User, App } from 'app/models';
 
 export class UserApp extends Model {
 
@@ -22,6 +23,12 @@ export class UserApp extends Model {
 
   @field()
   public updatedAt: FieldTypes.Date;
+
+  @Relations.belongsTo('user_id')
+  public user: User;
+
+  @Relations.belongsTo('app_id')
+  public app: App;
 }
 
 export class UserAppCollection extends Collection<UserApp> {
