@@ -15,6 +15,7 @@ export async function up(db: knex) {
     table.foreign('app_id').references('id').inTable('apps');
     table.foreign('user_id').references('id').inTable('users');
     table.foreign('access_level_id').references('id').inTable('access_levels');
+    table.unique(['app_id', 'user_id']);
   });
 }
 

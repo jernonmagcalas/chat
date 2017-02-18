@@ -50,6 +50,6 @@ export class OauthController extends Controller {
         break;
     }
 
-    return response.json({ body });
+    return response.json({ data: body });
   }
 }

@@ -1,7 +1,7 @@
 import { injectable, KeyValuePair, Hash, File } from 'chen/core';
 import { Service } from 'chen/sql';
 import { User } from 'app/models';
-import { UtilService } from 'app/services';
+import { UtilService, UserAppService } from 'app/services';
 import * as mkdirp from 'mkdirp';
 
 /**
@@ -12,7 +12,7 @@ export class UserService extends Service<User> {
 
   protected modelClass = User;
 
-  public constructor(private utilService: UtilService) {
+  public constructor(private utilService: UtilService, private userAppService: UserAppService) {
     super();
   }
 
@@ -41,5 +41,24 @@ export class UserService extends Service<User> {
     }
 
     return await super.create(data);
+  }
+
+  public async createByApp(data: KeyValuePair<any>) {
+    this.validate(data, {
+      app_id: ['required'],
+      access_level_id: ['required']
+    });
+
+    return this.transaction<User>(async function (this) {
+      let user = await this.create(data);
+
+      await this.userAppService.create({
+        app_id: data['app_id'],
+        user_id: user.getId(),
+        access_level_id: data['access_level_id']
+      });
+
+      return user;
+    });
   }
 }

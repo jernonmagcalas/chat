@@ -1,4 +1,5 @@
-import { Model, Collection, field, FieldTypes } from 'chen/sql';
+import { Model, Collection, field, FieldTypes, Relations } from 'chen/sql';
+import { User, App } from 'app/models';
 
 export class AccessToken extends Model {
 
@@ -35,6 +36,12 @@ export class AccessToken extends Model {
   public isAppToken() {
     return this.userId ? false : true;
   }
+
+  @Relations.belongsTo('user_id')
+  public user: User;
+
+  @Relations.belongsTo('app_id')
+  public app: App;
 }
 
 export class AccessTokenCollection extends Collection<AccessToken> {

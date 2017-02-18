@@ -12,6 +12,6 @@ export class AppController extends Controller {
   public async store(request: Request, response: Response) {
     let input = request.input.all();
 
-    return response.json(await this.appService.create(input));
+    return response.json({ data: await this.appService.create(input)});
   }
 }
