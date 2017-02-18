@@ -30,4 +30,12 @@ export class UtilService extends Service {
       });
     });
   }
+
+  public generateSessionId(): Promise<string> {
+    return new Promise((resolve) => {
+      var sha = crypto.createHash('sha256');
+      sha.update(Math.random().toString());
+      return resolve(sha.digest('hex'));
+    });
+  }
 }

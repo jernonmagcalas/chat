@@ -13,11 +13,14 @@ export default function (router: Router, config: Config) {
     // access token required
     router.group({ middleware: ['ValidateApiToken'] }, (router) => {
       router.resource('users', 'UserController');
+      router.resource('tags', 'TagController');
+      router.group({ middleware: ['ValidateTag'], prefix: 'tags/:tag_id' }, router => {
+        router.route('POST', 'assign/:user_id', 'UserTagController@store');
+      });
+
+      router.resource('guests', 'GuestController');
     });
   });
 
   router.route('GET', '/', 'IndexController@index');
-
-
-
 }

@@ -31,7 +31,7 @@ export class UserController extends Controller {
       // create the user and assign to app
       data['app_id'] = token.app.getId();
       data['access_level_id'] = accessLevel.getId();
-      await this.userService.createByApp(data);
+      user =await this.userService.createByApp(data);
     } else {
       let userApp = await this.userAppService.findOne({ app_id: token.app.getId(), user_id: user.getId() });
       if (!userApp) {
@@ -44,6 +44,6 @@ export class UserController extends Controller {
       }
     }
 
-    return response.json(token.app);
+    return response.json(user);
   }
 }

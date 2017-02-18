@@ -43,7 +43,7 @@ export class UserService extends Service<User> {
     return await super.create(data);
   }
 
-  public async createByApp(data: KeyValuePair<any>) {
+  public async createByApp(data: KeyValuePair<any>): Promise<User> {
     this.validate(data, {
       app_id: ['required'],
       access_level_id: ['required']
