@@ -22,6 +22,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cheerio": "^0.22.0",
     "chen": "git://github.com/chen-framework/chen.git#compiled",
     "chen-react": "^0.1.1",
     "connect-redis": "^3.0.2",

@@ -6,3 +6,8 @@ export * from './AccessLevel';
 export * from './Guest';
 export * from './Tag';
 export * from './UserTag';
+export * from './ChatRoom';
+export * from './ChatRoomUser';
+export * from './Link';
+export * from './File';
+export * from './Message';

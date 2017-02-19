@@ -20,6 +20,11 @@ export default function (router: Router, config: Config) {
       router.resource('tags', 'TagController');
       router.group({ middleware: ['ValidateTag'], prefix: 'tags/:tag_id' }, router => {
         router.route('POST', 'assign/:user_id', 'UserTagController@store');
+        router.route('GET', 'chat-room/:session_id', 'ChatRoomController@getGuestChatRoom');
+      });
+
+      router.group({ middleware: ['ValidateChatRoom'], prefix: 'chat-rooms/:chat_room_id' }, router => {
+        router.resource('messages', 'MessageController');
       });
 
       router.resource('guests', 'GuestController');

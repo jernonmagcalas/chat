@@ -7,3 +7,8 @@ export * from './UtilService';
 export * from './GuestService';
 export * from './TagService';
 export * from './UserTagService';
+export * from './ChatRoomService';
+export * from './ChatRoomUserService';
+export * from './FileService';
+export * from './LinkService';
+export * from './MessageService';

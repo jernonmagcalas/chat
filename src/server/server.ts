@@ -1,6 +1,7 @@
 import { LanguageProvider, ViewProvider } from 'chen/core';
 import { ArtisanProvider } from 'chen/console';
 import { ConnectionProvider } from 'chen/sql';
+import { CorsProvider } from './http/cors';
 import {
   SettingsProvider,
   ContextProvider,
@@ -25,6 +26,7 @@ bootstrap(__dirname, [
     RequestProvider,
     SessionProvider,
     ViewProvider,
+    CorsProvider,
     RouteProvider,
     ExceptionProvider,
     SocketIOProvider
