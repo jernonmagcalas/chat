@@ -1,6 +1,6 @@
 import { injectable, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
-import { App } from 'app/models';
+import { App, User, AccessLevel } from 'app/models';
 import { UserService, UserAppService, UtilService } from 'app/services';
 import { AccessLevelService } from 'app/services/AccessLevelService';
 
@@ -68,6 +68,16 @@ export class AppService extends Service<App> {
 
       return app;
     });
+  }
+
+  public async getAdmin(appId: string | number): Promise<User> {
+    let accessLevel = await this.accessLevelService.findOne({ app_id: appId, type: AccessLevel.OWNER });
+    return this.userService.query(query => {
+      query.select('users.*');
+      query.innerJoin('user_apps', 'user_apps.user_id', 'users.id');
+
+      query.where({ access_level_id: accessLevel.getId() });
+    }).getOne();
   }
 
   private isValidSlug(string): boolean {

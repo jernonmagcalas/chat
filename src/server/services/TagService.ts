@@ -1,6 +1,7 @@
 import { injectable, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
 import { Tag } from 'app/models';
+import { UserTagService, AppService } from 'app/services';
 
 /**
  * Tag Service
@@ -10,7 +11,7 @@ export class TagService extends Service<Tag> {
 
   protected modelClass = Tag;
 
-  public constructor() {
+  public constructor(private appService: AppService, private userTagService: UserTagService) {
     super();
   }
 
@@ -26,7 +27,31 @@ export class TagService extends Service<Tag> {
       );
     }
 
-    return super.create(data);
+    let tag = await super.create(data);
+
+    // assign the admin in the tag
+    let admin = await this.appService.getAdmin(data['app_id']);
+    this.userTagService.create({
+      app_id: data['app_id'],
+      tag_id: tag.getId(),
+      email: admin.get('email')
+    });
+
+    return tag;
+  }
+
+  public async update(id: string | number, data: KeyValuePair<any>): Promise<boolean> {
+    this.validate(data, {
+      name: ['required']
+    });
+
+    if (data['name'] && !this.isValidName(data['name'])) {
+      throw new ValidatorException(
+        {name: ['Tag Name should only contain letters, numbers, dash or underscore.']}
+      );
+    }
+
+    return super.update(id, data);
   }
 
   private isValidName(string): boolean {

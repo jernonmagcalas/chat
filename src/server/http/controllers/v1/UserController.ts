@@ -11,6 +11,25 @@ export class UserController extends Controller {
     super();
   }
 
+  public async index(request: Request, response: Response) {
+    let token = response.locals.token;
+    await token.load('app');
+    let email = request.input.get('email', null);
+    // let limit = request.input.get('limit', 10);
+    // let sinceId = request.input.get('since_id');
+
+    let users = await this.userAppService.query(query => {
+      query.select('user_apps.*');
+      query.where('app_id', token.app.getId());
+      if (email) {
+        query.innerJoin('users', 'user_apps.user_id', 'users.id');
+        query.where('users.email', email);
+      }
+    }).with('user').with('accessLevel').get();
+
+    return response.json({ data: users })
+  }
+
   /**
    * Create a user for an app
    * @param request

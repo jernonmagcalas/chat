@@ -15,6 +15,7 @@ export class CorsProvider extends Provider {
     app.use((request: express.Request, response: express.Response, next: express.NextFunction) => {
       response.setHeader("Access-Control-Allow-Origin", "*");
       response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      response.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
       next();
     });
   }

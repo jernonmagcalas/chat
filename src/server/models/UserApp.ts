@@ -1,5 +1,5 @@
 import { Model, Collection, field, FieldTypes, Relations } from 'chen/sql';
-import { User, App } from 'app/models';
+import { User, App, AccessLevel } from 'app/models';
 
 export class UserApp extends Model {
 
@@ -29,6 +29,9 @@ export class UserApp extends Model {
 
   @Relations.belongsTo('app_id')
   public app: App;
+
+  @Relations.belongsTo('access_level_id')
+  public accessLevel: AccessLevel;
 }
 
 export class UserAppCollection extends Collection<UserApp> {
