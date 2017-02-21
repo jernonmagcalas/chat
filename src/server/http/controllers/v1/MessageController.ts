@@ -65,6 +65,7 @@ export class MessageController extends Controller {
     }
 
     data['chat_room_id'] = chatRoom.getId();
+    data['app_id'] = token.app.getId();
     data['sender'] = guest;
 
     return response.json({ data: await this.messageService.create(data) });
@@ -85,6 +86,7 @@ export class MessageController extends Controller {
     }
 
     data['chat_room_id'] = chatRoom.getId();
+    data['app_id'] = token.app.getId();
     data['sender'] = user;
 
     return response.json({ data: await this.messageService.create(data) });

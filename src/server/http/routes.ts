@@ -12,6 +12,7 @@ export default function (router: Router, config: Config) {
 
     // access token required
     router.group({ middleware: ['ValidateApiToken'] }, (router) => {
+      router.route('POST', 'upload', 'FileController@upload');
       router.resource('users', 'UserController');
       router.group({ middleware: ['ValidateAppUser'], prefix: 'users/:user_id' }, router => {
         router.route('GET', 'tags', 'UserTagController@index');

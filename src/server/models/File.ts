@@ -9,7 +9,7 @@ export class File extends Model {
   public id: FieldTypes.Number;
 
   @field()
-  public filename: FieldTypes.String;
+  public fileName: FieldTypes.String;
 
   @field()
   public name: FieldTypes.String;
@@ -27,7 +27,7 @@ export class File extends Model {
   public sizes: FieldTypes.JSONObject;
 
   public getSizesAttribute(value) {
-    let file = this.get('filename');
+    let file = this.get('file_name');
     let files: any = {};
     if (file && this.get('type').indexOf('image') > -1) {
       let parts = file.split('.');
