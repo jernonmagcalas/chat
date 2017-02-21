@@ -55,7 +55,6 @@ export class MessageService extends Service<Message> {
       message.set('originData', sender);
 
       await this.chatRoomUserService.newMessageUpdate(message, sender);
-      console.log(message.chatRoomId.valueOf());
       this.socket.to(`chat-rooms@${message.chatRoomId.valueOf()}`).emit('new-message', message);
 
       return message;

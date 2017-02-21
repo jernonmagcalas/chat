@@ -34,10 +34,7 @@ export class ConnectionHandler extends SocketIOHandler {
       });
 
       if (chatRooms.size) {
-        chatRooms.forEach(room => {
-          console.log(room.get('chat_room_id'));
-          socket.join(`chat-rooms@${room.get('chat_room_id')}`);
-        });
+        chatRooms.forEach(room => socket.join(`chat-rooms@${room.get('chat_room_id')}`));
       }
 
       user.set('is_online', true);

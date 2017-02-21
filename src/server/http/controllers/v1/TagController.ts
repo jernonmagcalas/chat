@@ -1,6 +1,7 @@
 import { Controller, Request, Response, HttpException } from 'chen/web';
 import { injectable, ValidatorException } from 'chen/core';
 import { TagService } from 'app/services';
+import { TagCollection } from 'app/models';
 
 @injectable()
 export class TagController extends Controller {
@@ -20,6 +21,20 @@ export class TagController extends Controller {
     await token.load('app');
 
     return response.json({ data: await this.tagService.find({ is_active: true, app_id: token.app.getId() })});
+  }
+
+  /**
+   * List tags for guests
+   * @param request
+   * @param response
+   * @return {Promise<JSONResponse>}
+   */
+  public async getByGuests(request: Request, response: Response) {
+    let { token, guest } = response.locals;
+    await token.load('app');
+    let tags = await this.tagService.find({ is_active: true, app_id: token.app.getId() });
+    tags = await this.tagService.loadChatRooms(tags as TagCollection, guest);
+    return response.json({ data: tags});
   }
 
   /**

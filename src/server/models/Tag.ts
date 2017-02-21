@@ -1,5 +1,5 @@
-import { Model, Collection, field, FieldTypes, Relations } from 'chen/sql';
-import { UserCollection } from 'app/models';
+import { Model, Collection, field, FieldTypes, Relations, virtual } from 'chen/sql';
+import { UserCollection, ChatRoomUser } from 'app/models';
 
 export class Tag extends Model {
 
@@ -23,6 +23,13 @@ export class Tag extends Model {
 
   @field()
   public updatedAt: FieldTypes.Date;
+
+  @virtual()
+  public chatRoomUser: ChatRoomUser;
+
+  public getChatRoomUserAttribute() {
+    return this.attributes['chat_room_user'];
+  }
 
   @Relations.belongsToMany('user_tags', 'tag_id', 'user_id')
   public users: UserCollection;

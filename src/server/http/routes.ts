@@ -30,6 +30,9 @@ export default function (router: Router, config: Config) {
       });
 
       router.resource('guests', 'GuestController');
+      router.group({ middleware: ['ValidateGuest'], prefix: 'guests/:guest_id' }, router => {
+        router.route('GET', 'tags', 'TagController@getByGuests');
+      });
     });
   });
 
