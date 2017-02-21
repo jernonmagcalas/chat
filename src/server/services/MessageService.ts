@@ -1,14 +1,16 @@
 import { injectable, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
-import { Message, MessageCollection } from 'app/models';
-import { UserService, GuestService } from 'app/services';
+import { Message, MessageCollection, Guest, User } from 'app/models';
+import { UserService, GuestService, ChatRoomUserService } from 'app/services';
+import { SocketIO } from 'chen/web';
 
 @injectable()
 export class MessageService extends Service<Message> {
 
   protected modelClass = Message;
 
-  constructor(private userService: UserService, private guestService: GuestService) {
+  constructor(private userService: UserService, private guestService: GuestService,
+              private chatRoomUserService: ChatRoomUserService, private socket: SocketIO) {
     super();
   }
 
@@ -22,12 +24,24 @@ export class MessageService extends Service<Message> {
     return this.transaction<Message>(async function(this) {
       this.validate(data, {
         chat_room_id: ['required'],
-        origin: ['required', 'in:users,guests'],
-        origin_id: ['required']
+        sender: ['required']
       });
+
+      let sender = data['sender'];
+      delete ['sender'];
+
+      data['origin_id'] = sender.getId();
+      data['origin'] = sender instanceof Guest ? 'guests' : 'users';
 
       if (!data['file'] && !data['content']) {
         throw new ValidatorException({ content: ['Content cannot be empty .'] })
+      }
+
+      // check if the user is part of chat room
+      if (data['origin'] instanceof User) {
+        if (!await this.chatRoomUserService.isMember(data['chat_room_id'], sender)) {
+          throw new ValidatorException({ content: ['You are not member of the chat room'] })
+        }
       }
 
       let message = await create.call(this, {
@@ -38,6 +52,12 @@ export class MessageService extends Service<Message> {
         link_id: data['link_id']
       });
 
+      message.set('originData', sender);
+
+      await this.chatRoomUserService.newMessageUpdate(message, sender);
+      console.log(message.chatRoomId.valueOf());
+      this.socket.to(`chat-rooms@${message.chatRoomId.valueOf()}`).emit('new-message', message);
+
       return message;
     });
   }
@@ -45,7 +65,7 @@ export class MessageService extends Service<Message> {
   public async loadOriginData(collection: MessageCollection): Promise<MessageCollection> {
     // set origin data
     await collection.forEachAsync(async (n) => {
-      let id = n.get('origin_id')
+      let id = n.get('origin_id');
       switch (n.get('origin')) {
         case 'users':
           n.set('originData', await this.userService.findOne({ id }));

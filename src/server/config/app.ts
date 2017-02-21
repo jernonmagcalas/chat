@@ -81,11 +81,18 @@ export default {
       site: {
         model: 'User'
       },
-
       api: {
         model: 'AccessToken',
         service: 'auth/ApiService'
-      }
+      },
+      ws: {
+        model: 'User',
+        service: 'auth/SocketService'
+      },
+      wsGuest: {
+        model: 'Guest',
+        service: 'auth/SocketGuestService'
+      },
     }
   },
 

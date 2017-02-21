@@ -10,10 +10,13 @@ export async function up(db: knex) {
     table.integer('chat_room_id').unsigned().notNullable();
     table.integer('origin_id').notNullable().unsigned();
     table.enum('origin', ['users', 'guests']).notNullable();
+    table.integer('unread_count').notNullable().unsigned().defaultTo(0);
+    table.dateTime('last_message_date').nullable();
     table.timestamps();
 
     table.foreign('chat_room_id').references('id').inTable('chat_rooms');
     table.index(['origin_id']);
+    table.index(['last_message_date']);
     table.unique(['chat_room_id', 'origin_id', 'origin']);
   });
 }

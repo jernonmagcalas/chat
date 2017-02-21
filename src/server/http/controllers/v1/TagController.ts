@@ -52,8 +52,9 @@ export class TagController extends Controller {
     let token = response.locals.token;
     await token.load('app');
 
-    let tag = await this.tagService.findOne({ app_id: token.app.getId(), id: request.param('id') });
-    return response.json({ data: tag });
+    return response.json({
+      data: await this.tagService.findOne({ app_id: token.app.getId(), id: request.param('id') })
+    });
   }
 
   /**

@@ -1,11 +1,11 @@
 import { Controller, Request, Response } from 'chen/web';
 import { injectable } from 'chen/core';
-import { GuestService } from 'app/services';
+import { GuestService, ChatRoomUserService } from 'app/services';
 
 @injectable()
 export class GuestController extends Controller {
 
-  constructor(private guestService: GuestService) {
+  constructor(private guestService: GuestService, private chatRoomUserService: ChatRoomUserService) {
     super();
   }
 
@@ -34,5 +34,24 @@ export class GuestController extends Controller {
     await token.load('app');
     data['app_id'] = token.app.getId();
     return response.json({ data: await this.guestService.create(data)});
+  }
+
+  /**
+   * Get guest list by tag
+   * @param request
+   * @param response
+   * @return {Promise<JSONResponse>}
+   */
+  public async getByTag(request: Request, response: Response) {
+    let { token, tag } = response.locals;
+    await token.load('app');
+
+    let guests = await this.chatRoomUserService.getGuestsByTag(tag.getId());
+
+    guests = await this.chatRoomUserService.loadOriginData(guests);
+
+
+
+    return response.json({ data: guests});
   }
 }

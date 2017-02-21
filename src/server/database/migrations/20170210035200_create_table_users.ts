@@ -9,6 +9,7 @@ export async function up(db: knex) {
     table.increments('id');
     table.string('first_name');
     table.string('last_name');
+    table.string('username').notNullable();
     table.string('email').notNullable();
     table.string('password').nullable();
     table.string('profile_pic').nullable();
@@ -16,6 +17,7 @@ export async function up(db: knex) {
     table.timestamps();
 
     table.unique(['email']);
+    table.unique(['username']);
   });
 }
 

@@ -10,6 +10,7 @@ export async function up(db: knex) {
     table.integer('app_id').unsigned().notNullable();
     table.integer('user_id').unsigned().notNullable();
     table.integer('tag_id').unsigned().notNullable();
+    table.integer('unread_count').notNullable().unsigned().defaultTo(0);
     table.timestamps();
 
     table.foreign('app_id').references('id').inTable('apps');

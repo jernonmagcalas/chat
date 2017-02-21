@@ -25,6 +25,7 @@ export class GuestService extends Service<Guest> {
       if (await this.findOne({ app_id: data['app_id'], session_id: data['session_id'] })) {
         continue;
       }
+
       break;
     }
 

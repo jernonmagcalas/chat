@@ -19,6 +19,7 @@ export class UserService extends Service<User> {
   public async create(data: KeyValuePair<any>): Promise<User> {
     this.validate(data, {
       email: ['required', 'email'],
+      username: ['required'],
     });
 
     if (data['profile_pic']) {

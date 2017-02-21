@@ -1,4 +1,4 @@
-import { Model, Collection, field, FieldTypes } from 'chen/sql';
+import { field, FieldTypes, virtual, Model, Collection } from 'chen/sql';
 
 export class Guest extends Model {
 
@@ -16,6 +16,23 @@ export class Guest extends Model {
 
   @field()
   public email: FieldTypes.String;
+
+  @field()
+  public unreadCount: FieldTypes.Number;
+
+  @virtual()
+  public isOnline: FieldTypes.Boolean;
+
+  public getIsOnlineAttribute() {
+    return this.attributes['is_online'] ? true : false;
+  }
+
+  @virtual()
+  public fullName: FieldTypes.String;
+
+  public getFullNameAttribute() {
+    return `Guest${this.attributes['id']}`;
+  }
 
   @field()
   public createdAt: FieldTypes.Date;

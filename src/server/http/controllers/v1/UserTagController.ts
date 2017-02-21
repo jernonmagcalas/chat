@@ -1,7 +1,6 @@
 import { Controller, Request, Response } from 'chen/web';
 import { injectable } from 'chen/core';
 import { UserTagService } from 'app/services';
-import { UserApp } from 'app/models';
 
 @injectable()
 export class UserTagController extends Controller {
@@ -17,10 +16,25 @@ export class UserTagController extends Controller {
    * @return {Promise<void>}
    */
   public async index(request: Request, response: Response) {
-    let userApp: UserApp = response.locals.userApp;
-    await userApp.load('user');
-    await userApp.user.load('tags');
-    return response.json({ data: userApp.user.tags });
+    let { userApp } = response.locals;
+    let userTags = await this.userTagService.query(query => {
+      query.select('user_tags.*');
+      query.innerJoin('tags', 'tags.id', 'user_tags.tag_id');
+      query.where({
+        user_id: userApp.get('user_id'),
+        'user_tags.app_id': userApp.get('app_id'),
+        is_active: true,
+      })
+    }).get();
+
+    if (userTags.size) {
+      await userTags.load('tag', query => {
+        query.where({ is_active: true });
+      });
+    }
+
+
+    return response.json({ data: userTags });
   }
 
   /**

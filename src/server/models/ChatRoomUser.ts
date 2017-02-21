@@ -26,6 +26,12 @@ export class ChatRoomUser extends Model {
   }
 
   @field()
+  public unreadCount: FieldTypes.Number;
+
+  @field()
+  public lastMessageDate: FieldTypes.Date;
+
+  @field()
   public createdAt: FieldTypes.Date;
 
   @field()
