@@ -34,6 +34,7 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
 
   public async getGuestsByTag(tagId: string | number): Promise<ChatRoomUserCollection> {
     return this.query(query => {
+      query.select('chat_room_users.*');
       query.innerJoin('chat_rooms', 'chat_rooms.id', 'chat_room_users.chat_room_id');
 
       query.where({
@@ -100,5 +101,23 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
       }
     });
     return collection;
+  }
+
+  public async markRead(chatRoomId: string | number, user: Guest | User): Promise<number> {
+    let type = user instanceof User ? 'users' : 'guests';
+
+    let model = await this.findOne({
+      chat_room_id: chatRoomId,
+      origin_id: user.getId(),
+      origin: type
+    });
+
+    if (!model) {
+      return 0;
+    }
+
+    model.unreadCount = 0;
+    await model.save();
+    this.socket.to(`${type}@${user.getId()}`).emit('chat-room-user-update', model);
   }
 }

@@ -51,7 +51,6 @@ export class UserTagController extends Controller {
     }
     data['app_id'] = token.app.getId();
     data['tag_id'] = response.locals.tag.getId();
-    console.log(data);
     return response.json({ data: await this.userTagService.create(data)});
   }
 }

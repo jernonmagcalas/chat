@@ -1,11 +1,13 @@
 import { Controller, Request, Response } from 'chen/web';
 import { injectable } from 'chen/core';
-import { GuestService, ChatRoomUserService } from 'app/services';
+import { GuestService, ChatRoomUserService, UserService } from 'app/services';
+import { ChatRoomUserCollection } from 'app/models';
 
 @injectable()
 export class GuestController extends Controller {
 
-  constructor(private guestService: GuestService, private chatRoomUserService: ChatRoomUserService) {
+  constructor(private guestService: GuestService, private chatRoomUserService: ChatRoomUserService,
+              private userService: UserService) {
     super();
   }
 
@@ -46,12 +48,35 @@ export class GuestController extends Controller {
     let { token, tag } = response.locals;
     await token.load('app');
 
-    let guests = await this.chatRoomUserService.getGuestsByTag(tag.getId());
+    let user = await this.userService.findOne({ id: request.param('user_id') });
 
+    let guests = await this.chatRoomUserService.getGuestsByTag(tag.getId());
     guests = await this.chatRoomUserService.loadOriginData(guests);
 
+    let ids = [];
+    guests.forEach(guest => {
+      ids.push(guest.get('chat_room_id'));
+    });
 
+    let chatRoomUsers = new ChatRoomUserCollection();
+    if (ids) {
+      chatRoomUsers = await this.chatRoomUserService.query(query => {
+        query.whereIn('chat_room_id', ids);
+        query.where({ origin_id: user.getId(), origin: 'users' })
+      }).get() as ChatRoomUserCollection;
+    }
 
-    return response.json({ data: guests});
+    chatRoomUsers.forEach(item => {
+      guests.forEach(guest => {
+        if (guest.get('chat_room_id') == item.get('chat_room_id')) {
+          item.origin = 'guests';
+          item.originId = guest.getId();
+          item.set('originData', guest.originData);
+          return false;
+        }
+      });
+    });
+
+    return response.json({ data: chatRoomUsers });
   }
 }

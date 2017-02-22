@@ -1,5 +1,5 @@
 import { Controller, Request, Response, HttpException } from 'chen/web';
-import { _, injectable, File } from 'chen/core';
+import { injectable, File } from 'chen/core';
 import { FileService, UtilService } from 'app/services';
 
 import * as mkdirp from 'mkdirp';
