@@ -1,7 +1,7 @@
 import { injectable, File, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
 import { File as FileModel, Message, MessageCollection, Guest, User } from 'app/models';
-import { UserService, GuestService, ChatRoomUserService, FileService } from 'app/services';
+import { UserService, GuestService, ChatRoomUserService, FileService, UserTagService } from 'app/services';
 import { SocketIO } from 'chen/web';
 import * as mkdirp from 'mkdirp';
 import * as fs from 'fs';
@@ -12,7 +12,8 @@ export class MessageService extends Service<Message> {
   protected modelClass = Message;
 
   constructor(private userService: UserService, private guestService: GuestService,
-              private chatRoomUserService: ChatRoomUserService, private socket: SocketIO, private fileService: FileService) {
+              private chatRoomUserService: ChatRoomUserService, private socket: SocketIO,
+              private fileService: FileService, private userTagService: UserTagService) {
     super();
   }
 
@@ -71,7 +72,14 @@ export class MessageService extends Service<Message> {
 
       message.set('originData', sender);
       await message.load('chatRoom');
+
       await this.chatRoomUserService.newMessageUpdate(message, sender);
+
+      // increment tag notif
+      await this.userTagService.query(query => {
+        query.where({ app_id: data['app_id'], tag_id: message.chatRoom.get('tag_id') });
+      }).increment('unread_count', 1);
+
       this.socket.to(`chat-rooms@${message.chatRoomId.valueOf()}`).emit('new-message', message);
 
       return message;

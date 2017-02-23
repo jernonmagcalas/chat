@@ -1,11 +1,11 @@
 import { Controller, Request, Response } from 'chen/web';
 import { injectable } from 'chen/core';
-import { UserTagService } from 'app/services';
+import { UserTagService, UserService } from 'app/services';
 
 @injectable()
 export class UserTagController extends Controller {
 
-  constructor(private userTagService: UserTagService) {
+  constructor(private userTagService: UserTagService, private userService: UserService) {
     super();
   }
 
@@ -52,5 +52,13 @@ export class UserTagController extends Controller {
     data['app_id'] = token.app.getId();
     data['tag_id'] = response.locals.tag.getId();
     return response.json({ data: await this.userTagService.create(data)});
+  }
+
+  public async markRead(request: Request, response: Response) {
+    let { tag } = response.locals;
+
+    let user = await this.userService.findOne({ id: request.param('user_id') });
+
+    return response.json({ data: await this.userTagService.markRead(tag.getId(), user) });
   }
 }

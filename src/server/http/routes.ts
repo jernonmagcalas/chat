@@ -23,6 +23,7 @@ export default function (router: Router, config: Config) {
         router.route('POST', 'assign', 'UserTagController@store');
         router.route('GET', 'chat-room/:session_id', 'ChatRoomController@getGuestChatRoom');
         router.route('GET', 'guests/:user_id', 'GuestController@getByTag');
+        router.route('POST', 'mark-read/:user_id', 'UserTagController@markRead');
       });
 
       router.resource('chat-rooms', 'ChatRoomController');

@@ -1,7 +1,8 @@
 import { injectable, KeyValuePair } from 'chen/core';
 import { Service } from 'chen/sql';
-import { UserTag, AccessLevel } from 'app/models';
+import { UserTag, AccessLevel, User } from 'app/models';
 import { UserAppService, UserService, AccessLevelService, AppService } from 'app/services';
+import { SocketIO } from 'chen/web';
 
 /**
  * User Tag Service
@@ -12,7 +13,7 @@ export class UserTagService extends Service<UserTag> {
   protected modelClass = UserTag;
 
   public constructor(private userAppService: UserAppService, private userService: UserService,
-                     private accessLevelService: AccessLevelService, private appService: AppService) {
+                     private accessLevelService: AccessLevelService, private appService: AppService, private socket: SocketIO) {
     super();
   }
 
@@ -98,5 +99,20 @@ export class UserTagService extends Service<UserTag> {
     return !!this.query((query) => {
       query.where(data);
     }).delete();
+  }
+
+  public async markRead(tagId: string | number, user: User): Promise<number> {
+    let model = await this.findOne({
+      tag_id: tagId,
+      user_id: user.getId()
+    });
+
+    if (!model) {
+      return 0;
+    }
+
+    model.unreadCount = 0;
+    await model.save();
+    this.socket.to(`users@${user.getId()}`).emit('tag-user-update', model);
   }
 }
