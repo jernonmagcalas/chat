@@ -38,4 +38,9 @@ export class UtilService extends Service {
       return resolve(sha.digest('hex'));
     });
   }
+
+  public getAppDomain() {
+    let config = this.context.app.getConfig().get('app');
+    return `${config['protocol']}://${config['host']}`
+  }
 }

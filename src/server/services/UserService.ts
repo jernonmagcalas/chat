@@ -34,7 +34,7 @@ export class UserService extends Service<User> {
       }
 
       let file = await File.createFromBase64String(data['profile_pic'].split('base64,')[1], type, dir, fileName);
-      data['profile_pic'] = `/uploads/profile_pic/${file.name}`;
+      data['profile_pic'] = `${this.utilService.getAppDomain()}/uploads/profile_pic/${file.name}`;
     }
 
     if (data['password']) {

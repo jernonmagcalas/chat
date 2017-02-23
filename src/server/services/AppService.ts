@@ -27,7 +27,7 @@ export class AppService extends Service<App> {
 
       if (!this.isValidSlug(data['slug'])) {
         throw new ValidatorException(
-          {slug: ['Application slug should only contain small letters, dash or underscore.']}
+          {slug: ['Application slug should only contain small letters, numbers, dash or underscore.']}
         );
       }
 
@@ -81,7 +81,7 @@ export class AppService extends Service<App> {
   }
 
   private isValidSlug(string): boolean {
-    var pattern = new RegExp(/^[a-z\-\_]*$/g);
+    var pattern = new RegExp(/^[a-z0-9\-\_]*$/g);
     if (!pattern.test(string)) {
       return false;
     }
