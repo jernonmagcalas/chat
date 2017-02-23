@@ -1,0 +1,42 @@
+{% extends "emails/layout" %}
+
+{% block content %}
+<!-- BODY -->
+<table class="widget" width="100%" style="font-family: 'Droid Sans', sans-serif;box-sizing: border-box;background-color: #fff;height: 100px;padding: 15px;margin-bottom: 20px;-webkit-box-shadow: 0px 5px 5px -4px rgba(0, 0, 0, 0.55);-moz-box-shadow: 0px 5px 5px -4px rgba(0, 0, 0, 0.55);box-shadow: 0px 5px 5px -4px rgba(0, 0, 0, 0.55);width: 100%;">
+  <tr style="font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+    <td style="font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+      <div class="content" style="margin: 0 auto;padding: 15px;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;max-width: 600px;display: block;">
+        <table style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;width: 100%;">
+          <tr style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+            <td style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+              <h3 style="margin: 0;padding: 0;font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;line-height: 1.1;margin-bottom: 15px;color: #000;font-weight: 500;font-size: 24px;">Hi {{ name }}</h3>
+              {% if content.length %}
+              <p class="lead" style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;margin-bottom: 10px;font-weight: normal;font-size: 17px;line-height: 1.6;">{{ content }}.</p>
+              {% endif %}
+              {% if photo %}
+              <p style="text-align:center;margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;margin-bottom: 10px;font-weight: normal;font-size: 14px;line-height: 1.6;"><img src="{{ photo }}" style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;max-width: 100%;"></p>
+              {% endif %}
+              <!-- A Real Hero (and a real human being) -->
+              <hr style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+              <br style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+
+              <br style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+              <!-- /hero -->
+              <!-- Callout Panel -->
+              <br style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+              <br style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+              <!-- /Callout Panel -->
+              <span style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">Thanks,</span>
+              <br style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+              <b style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;">
+                {{ app.name }} Team
+              </b>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </td>
+    <td style="margin: 0;padding: 0;font-family: 'Droid Sans', sans-serif;box-sizing: border-box;"></td>
+  </tr>
+</table>
+{% endblock %}

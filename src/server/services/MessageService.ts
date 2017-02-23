@@ -1,10 +1,14 @@
 import { injectable, File, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
-import { File as FileModel, Message, MessageCollection, Guest, User } from 'app/models';
-import { UserService, GuestService, ChatRoomUserService, FileService, UserTagService } from 'app/services';
-import { SocketIO } from 'chen/web';
+import {
+  File as FileModel, Message, MessageCollection, Guest, User, ChatRoomUserCollection,
+  ChatRoomUser
+} from 'app/models';
+import { UserService, GuestService, ChatRoomUserService, FileService, UserTagService, AppService } from 'app/services';
+import { SocketIO, View } from 'chen/web';
 import * as mkdirp from 'mkdirp';
 import * as fs from 'fs';
+import { EmailService } from 'app/services/EmailService';
 
 @injectable()
 export class MessageService extends Service<Message> {
@@ -13,7 +17,8 @@ export class MessageService extends Service<Message> {
 
   constructor(private userService: UserService, private guestService: GuestService,
               private chatRoomUserService: ChatRoomUserService, private socket: SocketIO,
-              private fileService: FileService, private userTagService: UserTagService) {
+              private fileService: FileService, private userTagService: UserTagService,
+              private emailService: EmailService, private appService: AppService) {
     super();
   }
 
@@ -24,7 +29,7 @@ export class MessageService extends Service<Message> {
    */
   public async create(data: KeyValuePair<any>): Promise<Message> {
     let create = super.create;
-    return this.transaction<Message>(async function(this) {
+    let message = await this.transaction<Message>(async function(this) {
       this.validate(data, {
         chat_room_id: ['required'],
         sender: ['required'],
@@ -74,16 +79,26 @@ export class MessageService extends Service<Message> {
       await message.load('chatRoom');
 
       await this.chatRoomUserService.newMessageUpdate(message, sender);
-
       // increment tag notif
       await this.userTagService.query(query => {
         query.where({ app_id: data['app_id'], tag_id: message.chatRoom.get('tag_id') });
       }).increment('unread_count', 1);
-
       this.socket.to(`chat-rooms@${message.chatRoomId.valueOf()}`).emit('new-message', message);
 
       return message;
     });
+
+    // if sent by user to guest
+    if(message.get('origin') == 'users') {
+      let guest = await this.chatRoomUserService.getGuestByChatRoom(message.get('chat_room_id'));
+      guest = (await this.chatRoomUserService.loadOriginData(new ChatRoomUserCollection([guest]))).first();
+      
+      if (guest.originData.get('email') && !this.socket.getConnectedClients(`guests@${guest.originData.getId()}`).length) {
+        this.sendOfflineGuestMessage(guest, message, data['app_id']).catch(console.log);
+      }
+    }
+
+    return message;
   }
 
   /**
@@ -170,4 +185,29 @@ export class MessageService extends Service<Message> {
     return collection;
   }
 
+  public async sendOfflineGuestMessage(guestUser: ChatRoomUser, message: Message, appId: string | number) {
+    let app = await this.appService.findOne({ id: appId });
+    let subject = `${app.name} sent you a direct message`;
+    let template = await File.read('./resources/views/emails/message.html');
+
+    let data = {
+      domain: app.get('domain'),
+      app,
+      photo: message.file ? message.file.fileName : null,
+      logo: null,
+      name: guestUser['originData']['email'],
+      content: message['content']
+    };
+
+    //TODO: always null on first call;
+    let msg = await View.compile(template, data).render(this.context);
+
+    if (!msg) {
+      return;
+    }
+
+    let receiver = guestUser.originData['email'] as string;
+    await this.emailService.send(subject, msg, [{ email: receiver }], null, `${app.name}`)
+      .catch(console.log);
+  }
 }

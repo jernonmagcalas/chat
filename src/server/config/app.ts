@@ -361,5 +361,10 @@ export default {
     noCache: false
   },
 
-  extensions: {}
+  extensions: {
+    smtp: {
+      email: env('SMTP_EMAIL', 'jernonmagcalas@gmail.com'),
+      password: env('SMTP_PASSWORD', 'secret123'),
+    },
+  }
 };
