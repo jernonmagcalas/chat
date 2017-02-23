@@ -38,6 +38,12 @@ export class GuestController extends Controller {
     return response.json({ data: await this.guestService.create(data)});
   }
 
+  public async update(request: Request, response: Response) {
+    let email = request.input.get('email');
+    let data = { email };
+
+    return response.json({ date: await this.guestService.update(request.param('id'), data) })
+  }
   /**
    * Get guest list by tag
    * @param request
