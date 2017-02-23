@@ -1,12 +1,12 @@
 import { Controller, Request, Response, HttpException } from 'chen/web';
 import { injectable } from 'chen/core';
-import { ChatRoomService, GuestService } from 'app/services';
-import { AccessToken } from 'app/models';
+import { ChatRoomService, GuestService, ChatRoomUserService } from 'app/services';
+import { AccessToken, ChatRoomUser, ChatRoomUserCollection } from 'app/models';
 
 @injectable()
 export class ChatRoomController extends Controller {
 
-  constructor(private chatRoomService: ChatRoomService, private guestService: GuestService) {
+  constructor(private chatRoomService: ChatRoomService, private guestService: GuestService, private chatRoomUserService: ChatRoomUserService) {
     super();
   }
 
@@ -24,6 +24,43 @@ export class ChatRoomController extends Controller {
       guest_id: guest.getId()
     });
 
+    // get the guest chat room user
+    chatRoom.set('chat_room_user', await this.chatRoomUserService.getGuestByChatRoom(chatRoom.getId()));
+
+    await chatRoom.chatRoomUser.load('chatRoom');
+
     return response.json({ data: chatRoom});
+  }
+
+  public async show(request: Request, response: Response) {
+    let id = request.param('id');
+    let chatRoom = await this.chatRoomService.findOne({ id });
+
+    await chatRoom.load('chatRoomUsers');
+
+    return response.json({ data: chatRoom });
+  }
+
+  public async user(request: Request, response: Response) {
+    let id = request.param('chat_room_id');
+    let userId = request.param('user_id');
+    let chatRoom = await this.chatRoomService.findOne({ id });
+
+    // get the guest chat room user
+    let chatRoomGuest: ChatRoomUser = await this.chatRoomUserService.getGuestByChatRoom(chatRoom.getId());
+
+    // load the guest
+    let collection = await this.chatRoomUserService.loadOriginData(new ChatRoomUserCollection([chatRoomGuest]));
+    chatRoomGuest = collection.first();
+
+    let chatRoomUser: ChatRoomUser = await this.chatRoomUserService.findOne({
+      chat_room_id: chatRoom.getId(),
+      origin_id: userId,
+      origin: 'users'
+    });
+
+    chatRoomGuest.unreadCount = chatRoomUser.unreadCount;
+
+    return response.json({ data: chatRoomGuest });
   }
 }

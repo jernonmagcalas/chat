@@ -50,7 +50,7 @@ export class GuestController extends Controller {
 
     let user = await this.userService.findOne({ id: request.param('user_id') });
 
-    let guests = await this.chatRoomUserService.getGuestsByTag(tag.getId());
+    let guests: ChatRoomUserCollection = await this.chatRoomUserService.getGuestsByTag(tag.getId());
     guests = await this.chatRoomUserService.loadOriginData(guests);
 
     let ids = [];
@@ -69,14 +69,12 @@ export class GuestController extends Controller {
     chatRoomUsers.forEach(item => {
       guests.forEach(guest => {
         if (guest.get('chat_room_id') == item.get('chat_room_id')) {
-          item.origin = 'guests';
-          item.originId = guest.getId();
-          item.set('originData', guest.originData);
+          guest.unreadCount = item.unreadCount;
           return false;
         }
       });
     });
 
-    return response.json({ data: chatRoomUsers });
+    return response.json({ data: guests });
   }
 }

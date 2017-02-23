@@ -120,4 +120,14 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
     await model.save();
     this.socket.to(`${type}@${user.getId()}`).emit('chat-room-user-update', model);
   }
+
+
+  public async getGuestByChatRoom(chatRoomId?: string | number): Promise<ChatRoomUser> {
+    return this.query(query => {
+      query.where({
+        'origin': 'guests',
+        'chat_room_id': chatRoomId
+      });
+    }).getOne();
+  }
 }

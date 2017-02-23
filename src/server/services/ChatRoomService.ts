@@ -71,4 +71,8 @@ export class ChatRoomService extends Service<ChatRoom> {
       return chatRoom;
     });
   }
+
+  public async loadUsers() {
+
+  }
 }

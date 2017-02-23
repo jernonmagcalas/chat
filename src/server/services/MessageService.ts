@@ -70,7 +70,7 @@ export class MessageService extends Service<Message> {
       }
 
       message.set('originData', sender);
-
+      await message.load('chatRoom');
       await this.chatRoomUserService.newMessageUpdate(message, sender);
       this.socket.to(`chat-rooms@${message.chatRoomId.valueOf()}`).emit('new-message', message);
 
