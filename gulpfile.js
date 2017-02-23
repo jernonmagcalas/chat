@@ -112,7 +112,7 @@ gulp.task('build-assets:watch', ['build-assets'], () => {
 /**
  * Default task
  */
-gulp.task('default', ['build-server', 'build-assets']);
+gulp.task('default', ['build-client', 'build-server', 'build-assets']);
 
 /**
  * Watch task
