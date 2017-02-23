@@ -1,4 +1,4 @@
-import { Controller, Request, Response } from 'chen/web';
+import { Controller, Request, Response, SocketIO } from 'chen/web';
 import { injectable } from 'chen/core';
 import { GuestService, ChatRoomUserService, UserService } from 'app/services';
 import { ChatRoomUserCollection } from 'app/models';
@@ -7,7 +7,7 @@ import { ChatRoomUserCollection } from 'app/models';
 export class GuestController extends Controller {
 
   constructor(private guestService: GuestService, private chatRoomUserService: ChatRoomUserService,
-              private userService: UserService) {
+              private userService: UserService, private socket: SocketIO) {
     super();
   }
 
@@ -72,6 +72,18 @@ export class GuestController extends Controller {
           guest.unreadCount = item.unreadCount;
           return false;
         }
+      });
+    });
+
+    // set online status
+    guests.forEach(guest => {
+      let userSocket = this.socket.getConnectedClients(`guests@${guest.originData.getId()}`);
+      if (userSocket.length) {
+        guest.originData.set('is_online', true);
+      }
+
+      this.socket.getConnectedClients(`users@${user.getId()}`).forEach(socket => {
+        socket.join(`guests-online-status@${guest.originData['id']}`);
       });
     });
 

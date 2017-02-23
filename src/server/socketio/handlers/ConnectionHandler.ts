@@ -1,5 +1,5 @@
 import { SocketIOHandler, Socket } from 'chen/web';
-import { injectable } from 'chen/core';
+import { injectable, KeyValuePair } from 'chen/core';
 import { Guest, User } from 'app/models';
 import { ChatRoomUserService } from 'app/services';
 
@@ -38,7 +38,28 @@ export class ConnectionHandler extends SocketIOHandler {
       }
 
       user.set('is_online', true);
-      socket.to(`online-status@${user.getId()}`).emit('online-status', user);
+      socket.to(`${user instanceof User ? 'users' : 'guests'}-online-status@${user.getId()}`)
+        .emit('online-status', user);
+    }
+  }
+
+  public async disconnect(socket: Socket, data: KeyValuePair<any>) {
+    let type = socket.request.input.get('type');
+
+    let user: User | Guest;
+    switch (type) {
+      case 'users':
+        user = (await socket.request.auth('ws').user()) as User;
+        break;
+      case 'guests':
+        user = (await socket.request.auth('wsGuest').user()) as Guest;
+        break;
+    }
+
+    if (user) {
+      user.set('is_online', false);
+      socket.to(`${user instanceof User ? 'users' : 'guests'}-online-status@${user.getId()}`)
+        .emit('online-status', user);
     }
   }
 }

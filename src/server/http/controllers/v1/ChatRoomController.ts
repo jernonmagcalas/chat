@@ -1,4 +1,4 @@
-import { Controller, Request, Response, HttpException } from 'chen/web';
+import { Controller, Request, Response, HttpException, SocketIO } from 'chen/web';
 import { injectable } from 'chen/core';
 import { ChatRoomService, GuestService, ChatRoomUserService } from 'app/services';
 import { AccessToken, ChatRoomUser, ChatRoomUserCollection } from 'app/models';
@@ -6,7 +6,8 @@ import { AccessToken, ChatRoomUser, ChatRoomUserCollection } from 'app/models';
 @injectable()
 export class ChatRoomController extends Controller {
 
-  constructor(private chatRoomService: ChatRoomService, private guestService: GuestService, private chatRoomUserService: ChatRoomUserService) {
+  constructor(private chatRoomService: ChatRoomService, private guestService: GuestService,
+              private chatRoomUserService: ChatRoomUserService, private socket: SocketIO) {
     super();
   }
 
@@ -60,6 +61,15 @@ export class ChatRoomController extends Controller {
     });
 
     chatRoomGuest.unreadCount = chatRoomUser.unreadCount;
+
+    let userSocket = this.socket.getConnectedClients(`guests@${chatRoomGuest.originData.getId()}`);
+    if (userSocket.length) {
+      chatRoomGuest.originData.set('is_online', true);
+    }
+
+    this.socket.getConnectedClients(`users@${chatRoomUser.get('origin_id')}`).forEach(socket => {
+      socket.join(`guests-online-status@${chatRoomGuest.originData['id']}`);
+    });
 
     return response.json({ data: chatRoomGuest });
   }

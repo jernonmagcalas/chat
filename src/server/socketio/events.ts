@@ -4,7 +4,8 @@ export const EVENTS: SocketIOEventNamespace[] = [
   {
     namespace: '/',
     events: [
-      { name: 'connection', handler: 'ConnectionHandler@connection' }
+      { name: 'connection', handler: 'ConnectionHandler@connection' },
+      { name: 'disconnect', handler: 'ConnectionHandler@disconnect' },
     ]
   }
 ];
