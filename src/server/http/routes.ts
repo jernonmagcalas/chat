@@ -8,6 +8,7 @@ export default function (router: Router, config: Config) {
 
   // API Version 1
   router.group({domain: config.get('api.host'), prefix: 'v1', namespace: 'v1'}, (router) => {
+    router.route('POST', 'apps/check', 'AppController@check');
     router.resource('apps', 'AppController');
 
     // access token required

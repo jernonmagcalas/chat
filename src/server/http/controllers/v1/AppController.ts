@@ -14,4 +14,10 @@ export class AppController extends Controller {
 
     return response.json({ data: await this.appService.create(input)});
   }
+
+  public async check(request: Request, response: Response) {
+    let input = request.input.all();
+
+    return response.json({ data: await this.appService.check(input) });
+  }
 }

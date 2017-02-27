@@ -88,4 +88,18 @@ export class AppService extends Service<App> {
 
     return true;
   }
+
+  public async check(data: KeyValuePair<any>): Promise<KeyValuePair<any>> {
+    this.validate(data, {
+      slug: ['required']
+    });
+
+    if (!this.isValidSlug(data['slug'])) {
+      throw new ValidatorException(
+        {slug: ['Application slug should only contain small letters, numbers, dash or underscore.']}
+      );
+    }
+
+    return await this.findOne({ slug: data['slug'] });
+  }
 }
