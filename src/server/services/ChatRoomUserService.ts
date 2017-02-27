@@ -1,7 +1,7 @@
 import { injectable, KeyValuePair } from 'chen/core';
 import { Service } from 'chen/sql';
 import { ChatRoomUser, ChatRoomUserCollection, User, Guest } from 'app/models';
-import { UserService, GuestService } from 'app/services';
+import { UserService, GuestService, UserTagService } from 'app/services';
 import { SocketIO } from 'chen/web';
 
 /**
@@ -13,7 +13,7 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
   protected modelClass = ChatRoomUser;
 
   public constructor(private userService: UserService, private guestService: GuestService,
-                     private socket: SocketIO) {
+                     private socket: SocketIO, private userTagService: UserTagService) {
     super();
   }
 
@@ -53,7 +53,7 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
    * @param sender
    * @return {Promise<number>}
    */
-  public async newMessageUpdate(message, sender: Guest | User): Promise<number> {
+  public async newMessageUpdate(message, sender: Guest | User, appId: string | number): Promise<void> {
     // update the last message date in the chat room
     await this.query(query => {
       query.where({
@@ -66,7 +66,7 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
     });
 
     // increment notification
-    return this.query(query => {
+    await this.query(query => {
       query.where({
         chat_room_id: message.get('chat_room_id')
       });
@@ -77,6 +77,46 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
       });
 
     }).increment('unread_count', 1);
+
+    // increment users unread count
+    await this.query(query => {
+      query.joinRaw('INNER JOIN `users` on users.id = chat_room_users.origin_id AND chat_room_users.origin = "users"');
+      query.where({
+        'chat_room_users.chat_room_id': message.get('chat_room_id')
+      });
+
+      query.whereNot({
+        'chat_room_users.origin_id': sender.getId(),
+        'chat_room_users.origin': sender instanceof Guest ? 'guests' : 'users',
+      });
+
+    }).increment('users.unread_count', 1);
+
+    // increment guests unread count
+    await this.query(query => {
+      query.joinRaw('INNER JOIN `guests` on guests.id = chat_room_users.origin_id AND chat_room_users.origin = "guests"');
+      query.where({
+        'chat_room_users.chat_room_id': message.get('chat_room_id')
+      });
+
+      query.whereNot({
+        'chat_room_users.origin_id': sender.getId(),
+        'chat_room_users.origin': sender instanceof Guest ? 'guests' : 'users',
+      });
+
+    }).increment('guests.unread_count', 1);
+
+
+    // increment tag unread count
+    await this.userTagService.query(query => {
+      if (sender instanceof User) {
+        query.whereNot({ user_id: sender.getId() });
+      }
+
+      query.where({ app_id: appId, tag_id: message.chatRoom.get('tag_id') });
+    }).increment('unread_count', 1);
+
+    return;
   }
 
   public async isMember(chatRoomId: string | number, user: Guest | User): Promise<boolean> {

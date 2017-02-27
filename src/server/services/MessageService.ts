@@ -4,7 +4,7 @@ import {
   File as FileModel, Message, MessageCollection, Guest, User, ChatRoomUserCollection,
   ChatRoomUser
 } from 'app/models';
-import { UserService, GuestService, ChatRoomUserService, FileService, UserTagService, AppService } from 'app/services';
+import { UserService, GuestService, ChatRoomUserService, FileService, AppService } from 'app/services';
 import { SocketIO, View } from 'chen/web';
 import * as mkdirp from 'mkdirp';
 import * as fs from 'fs';
@@ -17,8 +17,8 @@ export class MessageService extends Service<Message> {
 
   constructor(private userService: UserService, private guestService: GuestService,
               private chatRoomUserService: ChatRoomUserService, private socket: SocketIO,
-              private fileService: FileService, private userTagService: UserTagService,
-              private emailService: EmailService, private appService: AppService) {
+              private fileService: FileService, private emailService: EmailService,
+              private appService: AppService) {
     super();
   }
 
@@ -78,11 +78,7 @@ export class MessageService extends Service<Message> {
       message.set('originData', sender);
       await message.load('chatRoom');
 
-      await this.chatRoomUserService.newMessageUpdate(message, sender);
-      // increment tag notif
-      await this.userTagService.query(query => {
-        query.where({ app_id: data['app_id'], tag_id: message.chatRoom.get('tag_id') });
-      }).increment('unread_count', 1);
+      await this.chatRoomUserService.newMessageUpdate(message, sender, data['app_id']);
       this.socket.to(`chat-rooms@${message.chatRoomId.valueOf()}`).emit('new-message', message);
 
       return message;
@@ -92,7 +88,7 @@ export class MessageService extends Service<Message> {
     if(message.get('origin') == 'users') {
       let guest = await this.chatRoomUserService.getGuestByChatRoom(message.get('chat_room_id'));
       guest = (await this.chatRoomUserService.loadOriginData(new ChatRoomUserCollection([guest]))).first();
-      
+
       if (guest.originData.get('email') && !this.socket.getConnectedClients(`guests@${guest.originData.getId()}`).length) {
         this.sendOfflineGuestMessage(guest, message, data['app_id']).catch(console.log);
       }
