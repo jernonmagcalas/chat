@@ -31,6 +31,9 @@ export class User extends Model {
   public isActive: FieldTypes.Boolean;
 
   @field()
+  public unreadCount: FieldTypes.Number;
+
+  @field()
   public createdAt: FieldTypes.Date;
 
   @field()
