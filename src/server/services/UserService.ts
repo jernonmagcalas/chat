@@ -36,6 +36,10 @@ export class UserService extends Service<User> {
 
       let file = await File.createFromBase64String(data['profile_pic'].split('base64,')[1], type, dir, fileName);
       data['profile_pic'] = `${this.utilService.getAppDomain()}/uploads/profile_pic/${file.name}`;
+    } else {
+      let number = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+      let randomPic = `${this.utilService.getAppDomain()}/assets/images/profile/${number}.png`;
+      data['profile_pic'] = randomPic;
     }
 
     if (data['password']) {

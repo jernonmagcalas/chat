@@ -21,6 +21,12 @@ export class GuestService extends Service<Guest> {
       app_id: ['required']
     });
 
+    if (!data['profile_pic']) {
+      let number = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+      let randomPic = `${this.utilService.getAppDomain()}/assets/images/profile/${number}.png`;
+      data['profile_pic'] = randomPic;
+    }
+
     while(true) {
       data['session_id'] = await this.utilService.generateSessionId();
       if (await this.findOne({ app_id: data['app_id'], session_id: data['session_id'] })) {
