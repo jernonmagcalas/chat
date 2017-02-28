@@ -3,6 +3,7 @@ import { Service } from 'chen/sql';
 import { User } from 'app/models';
 import { UtilService, UserAppService } from 'app/services';
 import * as mkdirp from 'mkdirp';
+import { SocketIO } from 'chen/web';
 
 /**
  * User Service
@@ -12,7 +13,7 @@ export class UserService extends Service<User> {
 
   protected modelClass = User;
 
-  public constructor(private utilService: UtilService, private userAppService: UserAppService) {
+  public constructor(private utilService: UtilService, private userAppService: UserAppService, private socket: SocketIO) {
     super();
   }
 
@@ -61,5 +62,19 @@ export class UserService extends Service<User> {
 
       return user;
     });
+  }
+
+  /**
+   * Set the unread count of a user to 0
+   * @param id
+   * @return {Promise<boolean>}
+   */
+  public async markRead(id: string | number): Promise<boolean> {
+    let success = this.update(id, { unread_count: 0 })
+    if (success) {
+      this.socket.to(`users@${id}`).emit('user-update', { unreadCount: 0 })
+    }
+
+    return success;
   }
 }

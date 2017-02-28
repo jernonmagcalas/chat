@@ -16,6 +16,7 @@ export default function (router: Router, config: Config) {
       router.route('POST', 'upload', 'FileController@upload');
       router.resource('users', 'UserController');
       router.group({ middleware: ['ValidateAppUser'], prefix: 'users/:user_id' }, router => {
+        router.route('POST', 'mark-read', 'UserController@markRead');
         router.route('GET', 'tags', 'UserTagController@index');
       });
 

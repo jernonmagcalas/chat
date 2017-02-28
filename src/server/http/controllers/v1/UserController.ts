@@ -65,4 +65,9 @@ export class UserController extends Controller {
 
     return response.json(user);
   }
+
+  public async markRead(request: Request, response: Response) {
+    let id = request.param('user_id');
+    return response.json({ data: await this.userService.markRead(id)})
+  }
 }
