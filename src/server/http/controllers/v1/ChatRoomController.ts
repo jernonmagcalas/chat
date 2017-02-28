@@ -54,11 +54,17 @@ export class ChatRoomController extends Controller {
     let collection = await this.chatRoomUserService.loadOriginData(new ChatRoomUserCollection([chatRoomGuest]));
     chatRoomGuest = collection.first();
 
+    await chatRoomGuest.load('chatRoom');
+
     let chatRoomUser: ChatRoomUser = await this.chatRoomUserService.findOne({
       chat_room_id: chatRoom.getId(),
       origin_id: userId,
       origin: 'users'
     });
+
+    if (!chatRoomUser) {
+      throw new HttpException(404, 'not found');
+    }
 
     chatRoomGuest.unreadCount = chatRoomUser.unreadCount;
 
