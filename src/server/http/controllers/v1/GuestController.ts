@@ -42,8 +42,21 @@ export class GuestController extends Controller {
     let email = request.input.get('email');
     let data = { email };
 
-    return response.json({ date: await this.guestService.update(request.param('id'), data) })
+    return response.json({ data: await this.guestService.update(request.param('id'), data) })
   }
+
+  /**
+   * Get Guest detail
+   * @param request
+   * @param response
+   * @return {Promise<JSONResponse>}
+   */
+  public async show(request: Request, response: Response) {
+    let id = request.param('id');
+
+    return response.json({ data: await this.guestService.findOne({ id }) })
+  }
+
   /**
    * Get guest list by tag
    * @param request
@@ -94,5 +107,11 @@ export class GuestController extends Controller {
     });
 
     return response.json({ data: guests });
+  }
+
+  public async markRead(request: Request, response: Response) {
+    let id = request.param('guest_id');
+
+    return response.json({ data: await this.guestService.markRead(id)})
   }
 }

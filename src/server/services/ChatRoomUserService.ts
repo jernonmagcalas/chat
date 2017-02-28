@@ -43,7 +43,7 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
       });
 
       query.whereNotNull('last_message_date');
-      query.orderBy('last_message_date');
+      query.orderBy('last_message_date', 'DESC');
     }).get() as Promise<ChatRoomUserCollection>;
   }
 
