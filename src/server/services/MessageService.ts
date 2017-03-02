@@ -2,13 +2,14 @@ import { injectable, File, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
 import {
   File as FileModel, Message, MessageCollection, Guest, User, ChatRoomUserCollection,
-  ChatRoomUser
+  ChatRoomUser, ChatRoom, MessageAudienceCollection
 } from 'app/models';
 import { UserService, GuestService, ChatRoomUserService, FileService, AppService } from 'app/services';
 import { SocketIO, View } from 'chen/web';
 import * as mkdirp from 'mkdirp';
 import * as fs from 'fs';
 import { EmailService } from 'app/services/EmailService';
+import { MessageAudienceService } from 'app/services/MessageAudienceService';
 
 @injectable()
 export class MessageService extends Service<Message> {
@@ -18,7 +19,7 @@ export class MessageService extends Service<Message> {
   constructor(private userService: UserService, private guestService: GuestService,
               private chatRoomUserService: ChatRoomUserService, private socket: SocketIO,
               private fileService: FileService, private emailService: EmailService,
-              private appService: AppService) {
+              private appService: AppService, private messageAudienceService: MessageAudienceService) {
     super();
   }
 
@@ -205,5 +206,36 @@ export class MessageService extends Service<Message> {
     let receiver = guestUser.originData['email'] as string;
     await this.emailService.send(subject, msg, [{ email: receiver }], null, `${app.name}`)
       .catch(console.log);
+  }
+
+  public async seen(ids: string[] | number[], user: User | Guest, chatRoom: ChatRoom): Promise<MessageAudienceCollection> {
+    let collection = new MessageAudienceCollection();
+    for(let id of ids) {
+      let message = await this.findOne({ id, chat_room_id: chatRoom.getId() });
+      if (!message) {
+        continue;
+      }
+
+      let messageAudience = await this.messageAudienceService.findOne({
+        message_id: id,
+        origin: user instanceof User ? 'users' : 'guests',
+        origin_id: user.getId()
+      });
+
+      if (messageAudience) {
+        continue;
+      }
+
+      messageAudience = await this.messageAudienceService.create({
+        message_id: id,
+        origin: user instanceof User ? 'users' : 'guests',
+        origin_id: user.getId()
+      });
+
+      collection.push(messageAudience);
+      this.socket.to(`chat-rooms@${chatRoom.getId()}`).emit('message-seen', { message, user })
+    }
+
+    return collection;
   }
 }

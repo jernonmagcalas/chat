@@ -1,13 +1,14 @@
 import { Controller, Request, Response } from 'chen/web';
 import { injectable, ValidatorException } from 'chen/core';
 import { MessageService, GuestService, UserService } from 'app/services';
-import { ChatRoom, MessageCollection } from 'app/models';
+import { ChatRoom, MessageCollection, User, Guest } from 'app/models';
+import { MessageAudienceService } from 'app/services/MessageAudienceService';
 
 @injectable()
 export class MessageController extends Controller {
 
   constructor(private messageService: MessageService, private guestService: GuestService,
-              private userService: UserService) {
+              private userService: UserService, private messageAudienceService: MessageAudienceService) {
     super();
   }
 
@@ -40,6 +41,11 @@ export class MessageController extends Controller {
     }).with('link').with('file').get() as MessageCollection;
 
     messages = await this.messageService.loadOriginData(messages);
+
+    if (messages.size) {
+      await messages.load('messageAudience');
+      messages = await this.messageAudienceService.loadAudience(messages);
+    }
 
     return response.json({ data: messages });
   }
@@ -90,5 +96,28 @@ export class MessageController extends Controller {
     data['sender'] = user;
 
     return response.json({ data: await this.messageService.create(data) });
+  }
+
+  public async seen(request: Request, response: Response) {
+    let chatRoom: ChatRoom = response.locals.chatRoom;
+    let data = request.input.all();
+    let user: User | Guest;
+
+    if (data['user_id']) {
+      user = await this.userService.findOne({ id: data['user_id'] });
+    }
+    if (data['guest_id']) {
+      user = await this.guestService.findOne({ id: data['guest_id'] });
+    }
+
+    if (!user) {
+      throw new ValidatorException({ 'user_id': ['Invalid user.']});
+    }
+
+    if (!data['message_ids'] || !data['message_ids'].length) {
+      return response.json({ data: null});
+    }
+
+    return response.json({ data: await this.messageService.seen(data['message_ids'], user, chatRoom) });
   }
 }

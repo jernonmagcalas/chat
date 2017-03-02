@@ -1,5 +1,6 @@
 import { Model, Collection, field, FieldTypes, Relations, virtual } from 'chen/sql';
-import { User, File, ChatRoom, Link, Guest } from 'app/models';
+import { User, File, ChatRoom, Link, Guest, MessageAudienceCollection } from 'app/models';
+import { KeyValuePair } from 'chen/core';
 
 export class Message extends Model {
 
@@ -40,6 +41,13 @@ export class Message extends Model {
   @field()
   public updatedAt: FieldTypes.Date;
 
+  @virtual()
+  public audience: KeyValuePair<any>[];
+
+  public getAudienceAttribute() {
+    return this.attributes['audience'];
+  }
+
   @Relations.belongsTo('chat_room_id')
   public chatRoom: ChatRoom;
 
@@ -48,6 +56,9 @@ export class Message extends Model {
 
   @Relations.belongsTo('link_id')
   public link: Link;
+
+  @Relations.hasMany('message_id')
+  public messageAudience: MessageAudienceCollection;
 }
 
 export class MessageCollection extends Collection<Message> {

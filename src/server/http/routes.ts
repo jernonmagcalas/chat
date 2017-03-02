@@ -33,6 +33,7 @@ export default function (router: Router, config: Config) {
         router.route('GET','user/:user_id', 'ChatRoomController@user');
         router.route('POST','reply', 'MessageController@reply');
         router.route('POST','mark-read', 'ChatRoomUserController@markRead');
+        router.route('POST', 'messages/seen', 'MessageController@seen');
         router.resource('messages', 'MessageController');
       });
 

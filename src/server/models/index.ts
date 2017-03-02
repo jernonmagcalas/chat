@@ -11,3 +11,4 @@ export * from './ChatRoomUser';
 export * from './Link';
 export * from './File';
 export * from './Message';
+export * from './MessageAudience';
