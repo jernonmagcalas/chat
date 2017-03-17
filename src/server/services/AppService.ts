@@ -38,10 +38,6 @@ export class AppService extends Service<App> {
 
       let user;
       if (!data['user_id'] && data['user']) {
-        this.validate(data['user'], {
-          password: ['required']
-        });
-
         // get the user by email
         user = await this.userService.findOne({ email: data['user']['email']});
         if (!user) {
