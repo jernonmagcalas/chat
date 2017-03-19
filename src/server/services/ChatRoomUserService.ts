@@ -1,5 +1,5 @@
 import { injectable, KeyValuePair } from 'chen/core';
-import { Service } from 'chen/sql';
+import { Service, QueryBuilder } from 'chen/sql';
 import { ChatRoomUser, ChatRoomUserCollection, User, Guest } from 'app/models';
 import { UserService, GuestService, UserTagService } from 'app/services';
 import { SocketIO } from 'chen/web';
@@ -57,12 +57,11 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
     // update the last message date in the chat room
     await this.query(query => {
       query.where({
-        chat_room_id: message.get('chat_room_id'),
-        origin_id: sender.getId(),
-        origin: sender instanceof Guest ? 'guests' : 'users',
+        chat_room_id: message.get('chat_room_id')
       });
     }).update({
-      last_message_date: new Date()
+      last_message_date: new Date(),
+      last_message_id: message.getId()
     });
 
     // increment notification
@@ -169,5 +168,39 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
         'chat_room_id': chatRoomId
       });
     }).getOne();
+  }
+
+  /**
+   * Get recent chatrooms for a user
+   * @param userId
+   * @param options
+   * @return {Promise<Collection<ChatRoomUser>>}
+   */
+  public async getRecentChatRoom(
+    user: User | Guest,
+    options: { limit?: number, since?: Date } = { limit: 10 }
+  ): Promise<ChatRoomUserCollection> {
+    let list = await this.query((query: QueryBuilder) => {
+      query.select('chat_room_users.*');
+      query.innerJoin('chat_rooms', 'chat_rooms.id', 'chat_room_id');
+      query.leftJoin('messages', 'chat_room_users.last_message_id', 'messages.id');
+      query.where({
+        'chat_room_users.origin': user instanceof User ? 'users' : 'guests',
+        'chat_room_users.origin_id': user.getId()
+      });
+
+      query.where(function () {
+        this.whereNotNull('chat_room_users.last_message_id');
+      });
+
+      query.orderBy('messages.created_at', 'DESC');
+      if (options['since']) {
+        query.where('messages.created_at', '<', options['since'])
+      }
+
+      query.limit(options['limit']);
+    }).with('lastMessage')
+      .get() as ChatRoomUserCollection;
+    return list;
   }
 }

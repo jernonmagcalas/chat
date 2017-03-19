@@ -28,6 +28,7 @@ export default function (router: Router, config: Config) {
         router.route('POST', 'mark-read/:user_id', 'UserTagController@markRead');
       });
 
+      router.route('GET','chat-rooms/recent/:user_id', 'ChatRoomUserController@recentChatRooms');
       router.resource('chat-rooms', 'ChatRoomController');
       router.group({ middleware: ['ValidateChatRoom'], prefix: 'chat-rooms/:chat_room_id' }, router => {
         router.route('GET','user/:user_id', 'ChatRoomController@user');

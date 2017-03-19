@@ -1,6 +1,6 @@
 import { injectable, KeyValuePair } from 'chen/core';
 import { Service } from 'chen/sql';
-import { ChatRoom } from 'app/models';
+import { ChatRoom, ChatRoomCollection } from 'app/models';
 import { ChatRoomUserService, TagService } from 'app/services';
 
 /**
@@ -72,7 +72,26 @@ export class ChatRoomService extends Service<ChatRoom> {
     });
   }
 
-  public async loadUsers() {
+  public async loadMembers(list: ChatRoomCollection, origin?: string): Promise<ChatRoomCollection> {
+    await list.load('chatRoomUsers', query => {
+      if (origin) {
+        query.where('origin', origin);
+      }
+    });
 
+    await this.chatRoomUserService.loadOriginData(list.getChatRoomUsers());
+
+    list.forEach(item => {
+      let members = [];
+      item.chatRoomUsers.forEach(item => {
+        members.push(item.originData)
+      });
+      if (members.length) {
+        item.set('members', members);
+      }
+    });
+
+    return list;
   }
+
 }
