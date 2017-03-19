@@ -36,6 +36,7 @@ export default function (router: Router, config: Config) {
         router.route('POST','mark-read', 'ChatRoomUserController@markRead');
         router.route('POST', 'messages/seen', 'MessageController@seen');
         router.resource('messages', 'MessageController');
+        router.route('get', 'recent-detail/:user_id', 'ChatRoomUserController@getDetailByChatRoomId');
       });
 
       router.resource('guests', 'GuestController');

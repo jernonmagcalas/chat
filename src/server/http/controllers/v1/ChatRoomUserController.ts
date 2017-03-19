@@ -1,6 +1,7 @@
 import { Controller, Request, Response, SocketIO } from 'chen/web';
 import { injectable } from 'chen/core';
 import { UserService, GuestService, ChatRoomUserService, ChatRoomService } from 'app/services';
+import { ChatRoom, ChatRoomCollection } from 'app/models';
 
 @injectable()
 export class ChatRoomUserController extends Controller {
@@ -26,8 +27,21 @@ export class ChatRoomUserController extends Controller {
   public async recentChatRooms(request: Request, response: Response) {
     let userId = request.param('user_id');
     let user = await this.userService.findOne({ id: userId });
-    let chatRoomUsers = await this.chatRoomUserService.getRecentChatRoom(user);
-    await chatRoomUsers.load('chatRoom');
+    let options = {
+      since: request.input.get('since', null),
+      limit: request.input.get('limit', 10),
+    };
+
+    if (options['since']) {
+      options['since'] = new Date(options['since']);
+    }
+
+    let chatRoomUsers = await this.chatRoomUserService.getRecentChatRoom(user, options);
+    if (!chatRoomUsers.size) {
+      return response.json({ data: [] });
+    }
+
+    await chatRoomUsers.load('chatRoom.tag');
     await this.chatRoomService.loadMembers(chatRoomUsers.getChatRooms(), 'guests');
 
     await chatRoomUsers.forEachAsync(async item => {
@@ -47,5 +61,37 @@ export class ChatRoomUserController extends Controller {
     });
 
     return response.json({ data: chatRoomUsers });
+  }
+
+  public async getDetailByChatRoomId(request: Request, response: Response) {
+    let chatRoom: ChatRoom = response.locals.chatRoom;
+    let userId = request.param('user_id');
+    let user = await this.userService.findOne({ id: userId });
+
+    let chatRoomUser = await this.chatRoomUserService.findOne({
+      origin: 'users',
+      origin_id: user.getId(),
+      chat_room_id: chatRoom.getId()
+    });
+
+    await chatRoomUser.load('lastMessage');
+    await chatRoom.load('tag');
+
+    let collection = await this.chatRoomService.loadMembers(new ChatRoomCollection([chatRoom]), 'guests');
+
+    chatRoomUser.chatRoom = collection.first();
+    chatRoomUser.chatRoom.chatRoomUsers = null;
+
+    let userTo = chatRoomUser.chatRoom.members[0];
+    let userSocket = this.socket.getConnectedClients(`guests@${userTo.getId()}`);
+    if (userSocket.length) {
+      userTo.set('is_online', true);
+    }
+
+    this.socket.getConnectedClients(`users@${userId}`).forEach(socket => {
+      socket.join(`online-status@${userTo.getId()}`);
+    });
+
+    return response.json({ data: chatRoomUser });
   }
 }

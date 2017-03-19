@@ -1,5 +1,5 @@
 import { Model, Collection, field, FieldTypes, Relations, virtual } from 'chen/sql';
-import { MessageCollection, ChatRoomUser, User, ChatRoomUserCollection } from 'app/models';
+import { MessageCollection, ChatRoomUser, User, ChatRoomUserCollection, Tag } from 'app/models';
 
 export class ChatRoom extends Model {
 
@@ -37,6 +37,9 @@ export class ChatRoom extends Model {
 
   @Relations.hasMany('chat_room_id')
   public chatRoomUsers: ChatRoomUserCollection;
+
+  @Relations.belongsTo('tag_id')
+  public tag: Tag;
 
 }
 
