@@ -1,7 +1,7 @@
 import { injectable, KeyValuePair, ValidatorException } from 'chen/core';
 import { Service } from 'chen/sql';
 import { App, User, AccessLevel } from 'app/models';
-import { UserService, UserAppService, UtilService } from 'app/services';
+import { UserService, UserAppService, UtilService, TagService } from 'app/services';
 import { AccessLevelService } from 'app/services/AccessLevelService';
 
 /**
@@ -13,7 +13,8 @@ export class AppService extends Service<App> {
   protected modelClass = App;
 
   public constructor(private userService: UserService, private userAppService: UserAppService,
-                     private accessLevelService: AccessLevelService, private utilService: UtilService) {
+                     private accessLevelService: AccessLevelService, private utilService: UtilService,
+                     private tagService: TagService) {
     super();
   }
 
@@ -60,6 +61,12 @@ export class AppService extends Service<App> {
         user_id: data['user_id'],
         app_id: app.getId(),
         access_level_id: accessLevels.getOwnerLevel().getId()
+      });
+
+      // create a default channel for the app
+      await this.tagService.create({
+        app_id: app.getId(),
+        name: 'General'
       });
 
       return app;
