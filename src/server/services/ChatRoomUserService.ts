@@ -167,7 +167,7 @@ export class ChatRoomUserService extends Service<ChatRoomUser> {
         'origin': 'guests',
         'chat_room_id': chatRoomId
       });
-    }).getOne();
+    }).with('lastMessage').getOne();
   }
 
   /**

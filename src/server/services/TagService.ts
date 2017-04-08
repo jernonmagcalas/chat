@@ -66,8 +66,9 @@ export class TagService extends Service<Tag> {
           'chat_rooms.tag_id': tag.getId(),
           'chat_room_users.origin_id': user.getId(),
           'chat_room_users.origin': user instanceof User ? 'users' : 'guests',
-        })
-      }).with('chatRoom').getOne();
+        });
+
+      }).with('chatRoom').with('lastMessage').getOne();
 
       if (chatRoomUser) {
         tag.set('chat_room_user', chatRoomUser);
