@@ -1,10 +1,10 @@
-import { injectable, File, KeyValuePair, ValidatorException } from 'chen/core';
+import { injectable, File, KeyValuePair, ValidatorException, _ } from 'chen/core';
 import { Service } from 'chen/sql';
 import {
   File as FileModel, Message, MessageCollection, Guest, User, ChatRoomUserCollection,
-  ChatRoomUser, ChatRoom, MessageAudienceCollection
+  ChatRoomUser, ChatRoom, MessageAudienceCollection, Link
 } from 'app/models';
-import { UserService, GuestService, ChatRoomUserService, FileService, AppService } from 'app/services';
+import { UserService, GuestService, ChatRoomUserService, FileService, AppService, LinkService } from 'app/services';
 import { SocketIO, View } from 'chen/web';
 import * as mkdirp from 'mkdirp';
 import * as fs from 'fs';
@@ -19,7 +19,7 @@ export class MessageService extends Service<Message> {
   constructor(private userService: UserService, private guestService: GuestService,
               private chatRoomUserService: ChatRoomUserService, private socket: SocketIO,
               private fileService: FileService, private emailService: EmailService,
-              private appService: AppService, private messageAudienceService: MessageAudienceService) {
+              private appService: AppService, private messageAudienceService: MessageAudienceService, private linkService: LinkService) {
     super();
   }
 
@@ -58,6 +58,23 @@ export class MessageService extends Service<Message> {
         }
       }
 
+      let link: Link;
+      if (data['link'] && _.isPlainObject(data['link']) && !_.isEmpty(data['link'])) {
+        if (this.linkService.validateLink(data['link'])) {
+
+          link = await this.linkService.findOne({ url: data['link']['url'] });
+          if (link) {
+            link.fill(data['link']);
+            await this.linkService.save(link);
+          } else {
+            link = await this.linkService.create(data['link']);
+          }
+
+          data['link_id'] = link.getId();
+          delete data['link'];
+        }
+      }
+
       let message = await create.call(this, {
         chat_room_id: data['chat_room_id'],
         origin_id: data['origin_id'],
@@ -74,6 +91,10 @@ export class MessageService extends Service<Message> {
         message.setRelatedModel('file', await this.addFileFromTemp(data['file'], message, data['app_id']));
         message.set('file_id', message.file.getId());
         await this.save(message);
+      }
+
+      if (link) {
+        message.link = link;
       }
 
       message.set('originData', sender);

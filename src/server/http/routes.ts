@@ -10,6 +10,7 @@ export default function (router: Router, config: Config) {
   router.group({domain: config.get('api.host'), prefix: 'v1', namespace: 'v1'}, (router) => {
     router.route('POST', 'apps/check', 'AppController@check');
     router.resource('apps', 'AppController');
+    router.route('GET', 'url-info', 'LinkController@urlInfo');
 
     // access token required
     router.group({ middleware: ['ValidateApiToken'] }, (router) => {
