@@ -32,7 +32,7 @@ export class TagService extends Service<Tag> {
 
     // assign the admin in the tag
     let admin = await this.appService.getAdmin(data['app_id']);
-    this.userTagService.create({
+    await this.userTagService.create({
       app_id: data['app_id'],
       tag_id: tag.getId(),
       email: admin.get('email')
